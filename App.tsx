@@ -14,9 +14,9 @@ const AppState = ({ children }: any) => {
 const App = () => {
   return (
     <NavigationContainer>
-      <AppState>
+      {/* <AppState> */}
         <Navigator />
-      </AppState>
+      {/* </AppState> */}
     </NavigationContainer>
   );
 }
