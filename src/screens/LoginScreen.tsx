@@ -22,10 +22,8 @@ export const LoginScreen = ({ navigation }: Props) => {
 
     useEffect(() => {
         if( errorMessage.length === 0 ) return;
-
-        Alert.alert(
-            'Login incorrecto',
-            errorMessage,
+        
+        Alert.alert( 'Login incorrecto', errorMessage,
             [
                 {
                     text: 'Ok',

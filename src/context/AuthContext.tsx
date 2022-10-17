@@ -28,8 +28,9 @@ export const AuthProvider = ({ children }: any)=> {
 
     const [ state, dispatch ] = useReducer( authReducer, authInicialState);
     
-    const signIn = async({ correo, password }: LoginData) => {
-
+    
+    const signIn = async({ correo, password }: LoginData ) => {
+        
         try {
             
             const { data } = await cafeApi.post<LoginResponse>('/auth/login', { correo, password });
@@ -39,22 +40,21 @@ export const AuthProvider = ({ children }: any)=> {
                     token: data.token,
                     user: data.usuario
                 }
-            })
-
+            });
+            
         } catch (error: any) {
             console.log(error.response.data.msg);
-            dispatch({ 
-                type: 'addError', 
+            dispatch({
+                type: 'addError',
                 payload: error.response.data.msg || 'Información incorrecta'
             })
         }
-
-
+        
+        
     };
-
+    
     const signUp = () => {};
     const logOut = () => {};
-
     const removeError = () => {
         dispatch({ type: 'removeError' });
     };
