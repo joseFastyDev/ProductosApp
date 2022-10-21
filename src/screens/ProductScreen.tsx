@@ -1,10 +1,11 @@
-import React, { useEffect, useContext } from 'react'
+import React, { useEffect, useContext, useState } from 'react'
 import { Text, View, StyleSheet, ScrollView, TextInput, Button, Image } from 'react-native'
 
-import { StackScreenProps } from '@react-navigation/stack'
 import {Picker} from '@react-native-picker/picker';
-import { ProductsStackParams } from '../navigator/ProductsNavigator'
+import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
 
+import { StackScreenProps } from '@react-navigation/stack'
+import { ProductsStackParams } from '../navigator/ProductsNavigator'
 import { useCategories } from '../hooks/useCategories';
 import { useForm } from '../hooks/useForm';
 import { ProductsContext } from '../context/ProductsContext';
@@ -15,8 +16,10 @@ export const ProductScreen = ({ navigation, route }: Props) => {
 
     const { id = '', name = '' } = route.params;
 
+    const [ tempUri, setTempUri ] = useState<string>();
+
     const { categories } = useCategories();
-    const { loadProductById, addProduct, updateProduct, deleteProduct } = useContext( ProductsContext );
+    const { loadProductById, addProduct, updateProduct, deleteProduct, uploadImage } = useContext( ProductsContext );
 
     const { _id, categoriaId, nombre, img, form, onChange, setFormValue } = useForm({
         _id: id,
@@ -59,8 +62,33 @@ export const ProductScreen = ({ navigation, route }: Props) => {
         }
     }
 
+    const takePhoto = () => {
+        launchCamera({
+            mediaType: 'photo',
+            quality: 0.5
+        }, (resp) => {
+            if ( resp.didCancel ) return;
+            if ( !resp.uri ) return;
+            
+            setTempUri( resp.uri );
+            uploadImage( resp, _id );
+        });
+    }
+
+    const takePhotoFromGallery = () => {
+        launchImageLibrary({
+            mediaType: 'photo',
+            quality: 0.5
+        }, (resp) => {
+            if ( resp.didCancel ) return;
+            if ( !resp.uri ) return;
+            
+            setTempUri( resp.uri );
+            uploadImage( resp, _id );
+        });
+    }
+
     const delProduct = async() => {
-        console.log( id );
         await deleteProduct( id );
         navigation.navigate('ProductsScreen');
     }
@@ -110,7 +138,7 @@ export const ProductScreen = ({ navigation, route }: Props) => {
                                 <Button
                                     title="Cámara"
                                     // TODO: Por hacer
-                                    onPress={ () => { } }
+                                    onPress={ takePhoto }
                                     color="#5856D6"
                                 />
 
@@ -119,7 +147,7 @@ export const ProductScreen = ({ navigation, route }: Props) => {
                                 <Button
                                     title="Galería"
                                     // TODO: Por hacer
-                                    onPress={ () => { } }
+                                    onPress={ takePhotoFromGallery }
                                     color="#5856D6"
                                 />
                             </View>
@@ -140,7 +168,7 @@ export const ProductScreen = ({ navigation, route }: Props) => {
 
 
                 {
-                    (img.length > 0) && (
+                    (img.length > 0 && !tempUri ) && (
                         <Image
                             source={{ uri: img }}
                             style={{
@@ -153,7 +181,18 @@ export const ProductScreen = ({ navigation, route }: Props) => {
                 }
 
                 {/* TODO: Mostrar imagen temporal */}
-                    
+                {
+                    ( tempUri ) && (
+                        <Image
+                            source={{ uri: tempUri }}
+                            style={{
+                                marginTop: 20,
+                                width: '100%',
+                                height: 300
+                            }} 
+                        />
+                    )
+                }
                 
             </ScrollView>
         </View>
